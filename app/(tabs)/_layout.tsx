@@ -84,7 +84,7 @@ export default function TabLayout() {
 
         options={{
 
-          title: 'Plan',
+          title: 'Meal Plan',
 
           tabBarIcon: () => (
 

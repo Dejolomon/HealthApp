@@ -1,10 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export type UserProfile = {
   name: string;
   height: number; // inches
   weight: number; // lbs
+  dateOfBirth?: string;
+  address?: string;
+  email?: string;
+  profilePhoto?: string;
+  theme?: 'blue' | 'green' | 'purple' | 'orange';
 };
 
 const STORAGE_KEY = 'healthapp:profile:v1';
@@ -13,6 +18,11 @@ const defaultProfile: UserProfile = {
   name: 'Alex',
   height: 70, // 5'10"
   weight: 165,
+  dateOfBirth: '',
+  address: '',
+  email: '',
+  profilePhoto: '',
+  theme: 'blue',
 };
 
 // Calculate BMI: weight (lbs) / height (in)^2 * 703

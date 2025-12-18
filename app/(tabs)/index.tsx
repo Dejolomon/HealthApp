@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -87,7 +88,12 @@ export default function HomeScreen() {
         <ThemedText type="defaultSemiBold" style={styles.appTitle} lightColor="#111827">
           Health Sync360
         </ThemedText>
-        <ThemedText style={styles.bellIcon}>🔔</ThemedText>
+        <TouchableOpacity onPress={() => router.push('/settings')}>
+          <Image
+            source={require('../../assets/images/Gear.png')}
+            style={styles.gearIcon}
+          />
+        </TouchableOpacity>
       </View>
 
       <ThemedView style={styles.heroCard}>
@@ -172,8 +178,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
-  bellIcon: {
-    fontSize: 18,
+  gearIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
   },
   heroCard: {
     marginTop: 20,

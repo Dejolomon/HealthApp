@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Switch, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -31,7 +31,7 @@ export default function PlanScreen() {
   return (
     <ThemedView style={styles.screen}>
       <ThemedText type="title" style={{ marginBottom: 8 }} lightColor="#1a1f2e">
-        Plan for today
+        Meal Plan
       </ThemedText>
 
       <ThemedView style={styles.card}>
