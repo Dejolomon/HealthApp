@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
     Image,
@@ -372,8 +373,6 @@ export default function InsightsScreen() {
           onPress={() => {
             // Open the Health Plan modal where the user can set goals for the upcoming week.
             // This uses the existing `/modal` route.
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const { router } = require('expo-router');
             router.push('/modal');
           }}
         >
