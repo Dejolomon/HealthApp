@@ -4,7 +4,7 @@
     "slug": "HealthApp_temp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/App_icon.png",
     "scheme": "healthapptemp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -33,7 +33,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#59d5f7",
           "dark": {
             "backgroundColor": "#000000"
           }
