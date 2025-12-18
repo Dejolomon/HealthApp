@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "HealthApp_temp",
-    "slug": "HealthApp_temp",
+    "name": "Health Sync 360",
+    "slug": "health-sync-360",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "healthapptemp",
+    "icon": "./assets/images/App_icon.png",
+    "scheme": "healthsync360",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

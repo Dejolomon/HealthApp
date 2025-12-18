@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "919370345104",
+    "project_id": "health-sync-360",
+    "storage_bucket": "health-sync-360.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919370345104:android:6b00403d2c5226fbb5c615",
+        "android_client_info": {
+          "package_name": "Health.Sync360"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwSPaqQ7Ch2rXb2roPpXyMVc01gdqRdBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

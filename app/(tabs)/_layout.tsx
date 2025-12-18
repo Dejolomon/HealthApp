@@ -1,56 +1,153 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+
+
+
+import { Image } from 'react-native';
+
+
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+
+
 import { Colors } from '@/constants/theme';
+
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+
+
 export default function TabLayout() {
+
   const colorScheme = useColorScheme();
 
+
+
   return (
+
     <Tabs
+
       screenOptions={{
+
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+
         headerShown: false,
+
         tabBarButton: HapticTab,
+
       }}>
+
       <Tabs.Screen
+
         name="index"
+
         options={{
+
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+
+          tabBarIcon: () => (
+
+            <Image
+
+              source={require('../../assets/images/Home_icon.png')}
+
+              style={{ width: 26, height: 26, resizeMode: 'contain' }}
+
+            />
+
+          ),
+
         }}
+
       />
+
       <Tabs.Screen
+
         name="insights"
+
         options={{
+
           title: 'Insights',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
+
+          tabBarIcon: () => (
+            <Image
+              source={require('../../assets/images/Insights.png')}
+              style={{ width: 26, height: 26, resizeMode: 'contain' }}
+            />
+          ),
+
         }}
+
       />
+
       <Tabs.Screen
+
         name="plan"
+
         options={{
+
           title: 'Plan',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="checkmark.circle.fill" color={color} />,
+
+          tabBarIcon: () => (
+
+            <Image
+
+              source={require('../../assets/images/Meal_Plan.png')}
+
+              style={{ width: 26, height: 26, resizeMode: 'contain' }}
+
+            />
+
+          ),
+
         }}
+
       />
+
       <Tabs.Screen
+
         name="resources"
+
         options={{
+
           title: 'Resources',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
+
+          tabBarIcon: () => (
+
+            <Image
+
+              source={require('../../assets/images/Resources.png')}
+
+              style={{ width: 26, height: 26, resizeMode: 'contain' }}
+
+            />
+
+          ),
+
         }}
+
       />
+
       <Tabs.Screen
+
         name="profile"
+
         options={{
+
           title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+
+          tabBarIcon: () => (
+            <Image
+              source={require('../../assets/images/Profile.png')}
+              style={{ width: 26, height: 26, resizeMode: 'contain' }}
+            />
+          ),
+
         }}
+
       />
+
     </Tabs>
+
   );
+
 }
+
