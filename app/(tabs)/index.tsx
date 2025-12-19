@@ -39,6 +39,22 @@ function RecommendationItem({ text }: { text: string }) {
   );
 }
 
+function getTimeBasedGreeting(): string {
+  const hour = new Date().getHours();
+  
+  if (hour >= 0 && hour < 5) {
+    return 'You should really be asleep';
+  } else if (hour >= 5 && hour < 12) {
+    return 'Good Morning';
+  } else if (hour >= 12 && hour < 16) {
+    return 'Good Afternoon';
+  } else if (hour >= 16 && hour < 19) {
+    return 'Good Evening';
+  } else {
+    return 'Good Night';
+  }
+}
+
 export default function HomeScreen() {
   const { profile } = useProfile();
   const {
@@ -46,6 +62,8 @@ export default function HomeScreen() {
     goals,
     recommendations,
   } = useHealthData();
+  
+  const greeting = getTimeBasedGreeting();
 
   const metricData: MetricCardProps[] = [
     { label: 'BMI', value: today.bmi.toFixed(1), helper: 'Healthy range', icon: '🩺' },
@@ -98,7 +116,7 @@ export default function HomeScreen() {
 
       <ThemedView style={styles.heroCard}>
         <ThemedText type="defaultSemiBold" style={styles.heroGreeting} lightColor="#ffffff">
-          Good morning, {profile.name}
+          {greeting}, {profile.name}
         </ThemedText>
         <ThemedText style={styles.heroSub} lightColor="#e7f4ff">
           Your health metrics look great today!
