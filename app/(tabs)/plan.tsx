@@ -4,7 +4,6 @@ import { Image, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 're
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useHealthData } from '@/hooks/use-health-data';
-import { useProfile } from '@/hooks/use-profile';
 
 type Meal = {
   id: string;
@@ -316,7 +315,6 @@ const mealDatabase: Meal[] = [
 
 export default function PlanScreen() {
   const { goals, today } = useHealthData();
-  const { profile } = useProfile();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'all' | Meal['category']>('all');
 
@@ -339,7 +337,7 @@ export default function PlanScreen() {
     return meals.sort((a, b) => b.protein - a.protein);
   }, [selectedCategory, remainingCalories]);
 
-  const categories: Array<{ key: 'all' | Meal['category']; label: string }> = [
+  const categories: { key: 'all' | Meal['category']; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'breakfast', label: 'Breakfast' },
     { key: 'lunch', label: 'Lunch' },
@@ -530,12 +528,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderWidth: 1.5,
+    borderColor: '#bfdbfe',
   },
   categoryButtonActive: {
-    backgroundColor: '#36c690',
-    borderColor: '#36c690',
+    backgroundColor: '#2563eb',
+    borderColor: '#2563eb',
   },
   categoryLabel: {
     fontSize: 13,
@@ -563,13 +561,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 0,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
+    shadowColor: '#3fb1ff',
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderWidth: 1.5,
+    borderColor: '#bae6fd',
   },
   mealImage: {
     width: '100%',
@@ -684,6 +682,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     marginTop: 2,
+    color: '#2563eb',
   },
   ingredientText: {
     flex: 1,
@@ -701,7 +700,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#36c690',
+    backgroundColor: '#2563eb',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,

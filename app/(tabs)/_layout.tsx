@@ -24,15 +24,11 @@ export default function TabLayout() {
   return (
 
     <Tabs
-
       screenOptions={{
-
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-
         headerShown: false,
-
         tabBarButton: HapticTab,
-
+        tabBarShowLabel: true,
       }}>
 
       <Tabs.Screen
@@ -79,27 +75,16 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-
         name="plan"
-
         options={{
-
           title: 'Meal Plan',
-
           tabBarIcon: () => (
-
             <Image
-
               source={require('../../assets/images/Meal_Plan.png')}
-
               style={{ width: 26, height: 26, resizeMode: 'contain' }}
-
             />
-
           ),
-
         }}
-
       />
 
       <Tabs.Screen

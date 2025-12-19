@@ -25,10 +25,11 @@ const defaultProfile: UserProfile = {
   theme: 'blue',
 };
 
-// Calculate BMI: weight (lbs) / height (in)^2 * 703
+// Calculate BMI using Imperial formula: BMI = (weight in pounds × 703) / (height in inches)²
+// Formula: BMI = (weight × 703) / (height²)
 export function calculateBMI(weight: number, height: number): number {
   if (height <= 0 || weight <= 0) return 0;
-  return (weight / (height * height)) * 703;
+  return (weight * 703) / (height * height);
 }
 
 export function useProfile() {

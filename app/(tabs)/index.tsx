@@ -55,6 +55,13 @@ function getTimeBasedGreeting(): string {
   }
 }
 
+function getBMICategory(bmi: number): string {
+  if (bmi < 18.5) return 'Underweight';
+  if (bmi < 25) return 'Normal';
+  if (bmi < 30) return 'Overweight';
+  return 'Obese';
+}
+
 export default function HomeScreen() {
   const { profile } = useProfile();
   const {
@@ -64,9 +71,10 @@ export default function HomeScreen() {
   } = useHealthData();
   
   const greeting = getTimeBasedGreeting();
+  const bmiCategory = getBMICategory(today.bmi);
 
   const metricData: MetricCardProps[] = [
-    { label: 'BMI', value: today.bmi.toFixed(1), helper: 'Healthy range', icon: '🩺' },
+    { label: 'BMI', value: today.bmi.toFixed(1), helper: bmiCategory, icon: '🩺' },
     { label: 'Blood Pressure', value: today.bloodPressure, helper: 'Resting', icon: '❤️' },
     { label: 'Blood Sugar', value: `${today.bloodSugar} mg/dL`, helper: 'Fasting', icon: '🩸' },
     { label: 'Steps', value: today.steps.toLocaleString(), helper: 'Today', icon: '👟' },
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#e5f0ff',
+    backgroundColor: '#3fb1ff',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -218,7 +226,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   heroSub: {
-    color: '#e7f4ff',
+    color: '#dbeafe',
     marginTop: 4,
     fontSize: 14,
     fontWeight: '600',
@@ -271,14 +279,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
+    shadowColor: '#3fb1ff',
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
     gap: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.5,
+    borderColor: '#bfdbfe',
   },
   sectionTitle: {
     marginBottom: 8,
@@ -322,7 +330,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: '800',
     fontSize: 18,
-    color: '#1a1f2e',
+    color: '#2563eb',
   },
   snapshotRow: {
     flexDirection: 'row',

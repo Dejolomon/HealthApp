@@ -10,15 +10,6 @@ import { ThemedView } from '@/components/themed-view';
 import { useHealthData } from '@/hooks/use-health-data';
 import { calculateBMI, useProfile } from '@/hooks/use-profile';
 
-type ThemeOption = 'blue' | 'green' | 'purple' | 'orange';
-
-const themes: { value: ThemeOption; label: string; color: string }[] = [
-  { value: 'blue', label: 'Blue', color: '#3fb1ff' },
-  { value: 'green', label: 'Green', color: '#36c690' },
-  { value: 'purple', label: 'Purple', color: '#9b59b6' },
-  { value: 'orange', label: 'Orange', color: '#ff914d' },
-];
-
 function EditableField({
   label,
   value,
@@ -65,7 +56,6 @@ export default function SettingsScreen() {
     dateOfBirth: profile.dateOfBirth || '',
     address: profile.address || '',
     email: profile.email || '',
-    theme: profile.theme || 'blue',
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [photoPermission, setPhotoPermission] = useState(false);
@@ -117,11 +107,6 @@ export default function SettingsScreen() {
     setHasChanges(true);
   };
 
-  const handleThemeChange = (theme: ThemeOption) => {
-    setInputs((prev) => ({ ...prev, theme }));
-    setHasChanges(true);
-  };
-
   const handlePhotoSelect = async () => {
     if (!photoPermission) {
       await requestPhotoPermission();
@@ -159,7 +144,6 @@ export default function SettingsScreen() {
         dateOfBirth: inputs.dateOfBirth,
         address: inputs.address,
         email: inputs.email,
-        theme: inputs.theme as ThemeOption,
         profilePhoto: profile.profilePhoto || '',
       };
       await saveProfile(newProfile);
@@ -292,37 +276,6 @@ export default function SettingsScreen() {
         </ThemedText>
         <View style={{ width: 60 }} />
       </View>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle} lightColor="#1a1f2e">
-          Theme
-        </ThemedText>
-        <View style={styles.themeGrid}>
-          {themes.map((theme) => (
-            <TouchableOpacity
-              key={theme.value}
-              style={[
-                styles.themeOption,
-                inputs.theme === theme.value && styles.themeOptionSelected,
-                { borderColor: theme.color },
-              ]}
-              onPress={() => handleThemeChange(theme.value)}
-            >
-              <View style={[styles.themeColorCircle, { backgroundColor: theme.color }]} />
-              <ThemedText
-                type="defaultSemiBold"
-                style={[
-                  styles.themeLabel,
-                  inputs.theme === theme.value && { color: theme.color },
-                ]}
-                lightColor={inputs.theme === theme.value ? theme.color : '#4a5568'}
-              >
-                {theme.label}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ThemedView>
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle" style={styles.sectionTitle} lightColor="#1a1f2e">
@@ -581,54 +534,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '800',
+    color: '#1e40af',
   },
   section: {
     backgroundColor: '#ffffff',
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
+    shadowColor: '#3fb1ff',
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.5,
+    borderColor: '#bfdbfe',
   },
   sectionTitle: {
     marginBottom: 16,
     fontWeight: '800',
     fontSize: 18,
-  },
-  themeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 8,
-  },
-  themeOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#f8f9fa',
-    minWidth: 100,
-    gap: 8,
-  },
-  themeOptionSelected: {
-    backgroundColor: '#f0f9ff',
-    borderWidth: 2,
-  },
-  themeColorCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-  },
-  themeLabel: {
-    fontSize: 14,
-    fontWeight: '700',
+    color: '#1e40af',
   },
   photoSection: {
     alignItems: 'center',
@@ -645,7 +570,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#e5f0ff',
+    backgroundColor: '#dbeafe',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -653,7 +578,7 @@ const styles = StyleSheet.create({
   profilePhotoText: {
     fontSize: 36,
     fontWeight: '800',
-    color: '#3fb1ff',
+    color: '#2563eb',
   },
   photoButtonText: {
     fontSize: 14,
@@ -664,7 +589,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   fieldLabel: {
-    color: '#4a5568',
+    color: '#1e40af',
     fontWeight: '800',
     fontSize: 14,
   },
@@ -697,11 +622,11 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: 12,
-    backgroundColor: '#36c690',
+    backgroundColor: '#2563eb',
     paddingVertical: 16,
     borderRadius: 14,
     alignItems: 'center',
-    shadowColor: '#36c690',
+    shadowColor: '#2563eb',
     shadowOpacity: 0.4,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
