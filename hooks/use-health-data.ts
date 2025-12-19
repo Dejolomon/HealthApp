@@ -39,12 +39,12 @@ const defaultDay = (): DaySummary => ({
   bmi: 23.5,
   bloodPressure: '120/80',
   bloodSugar: 95,
-  steps: 0,
-  sleep: 0,
+  steps: 5420,
+  sleep: 3,
   weight: 165,
-  water: 0,
-  calories: 0,
-  activity: 0,
+  water: 48, // oz - 60% of 80 oz goal
+  calories: 1680, // kcal - 76% of 2200 goal
+  activity: 68, // percentage
 });
 
 const defaultGoals: DailyGoals = {

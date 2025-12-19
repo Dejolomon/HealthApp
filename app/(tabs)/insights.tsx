@@ -191,11 +191,13 @@ export default function InsightsScreen() {
         <ThemedText style={styles.heroSubtitle} lightColor="#e5f2ff">
           You’ve been improving steadily for {rangeLabel.toLowerCase()}.
         </ThemedText>
-        <View style={styles.heroPill}>
-          <ThemedText style={styles.heroPillText} lightColor="#0f172a">
-            {sleepStreak > 0 ? `${sleepStreak} day sleep streak` : 'Start a new sleep streak'}
-          </ThemedText>
-        </View>
+        {sleepStreak > 0 && (
+          <View style={styles.heroPill}>
+            <ThemedText style={styles.heroPillText} lightColor="#0f172a">
+              {sleepStreak} day sleep streak
+            </ThemedText>
+          </View>
+        )}
       </ThemedView>
 
       {/* Metric cards (Sleep, Steps, Heart, Water) */}
