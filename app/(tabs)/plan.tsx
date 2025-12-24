@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -345,6 +345,36 @@ export default function PlanScreen() {
     { key: 'snack', label: 'Snacks' },
   ];
 
+  const handleOpenMaps = async () => {
+    const searchQuery = 'health food stores';
+    let url = '';
+
+    if (Platform.OS === 'ios') {
+      // iOS - Use Apple Maps
+      url = `maps://maps.apple.com/?q=${encodeURIComponent(searchQuery)}`;
+    } else if (Platform.OS === 'android') {
+      // Android - Use Google Maps app or web
+      url = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`;
+    } else {
+      // Web - Use Google Maps web
+      url = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`;
+    }
+
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        // Fallback to web version
+        await Linking.openURL(`https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`);
+      }
+    } catch (error) {
+      console.error('Error opening maps:', error);
+      // Fallback to web version
+      await Linking.openURL(`https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <ThemedText type="title" style={styles.header} lightColor="#1a1f2e">
@@ -407,6 +437,24 @@ export default function PlanScreen() {
             </ThemedView>
           </TouchableOpacity>
         ))}
+        
+        {/* Find Healthy Food Card */}
+        <TouchableOpacity
+          style={styles.mapCard}
+          onPress={handleOpenMaps}
+          activeOpacity={0.8}
+        >
+          <Image
+            source={require('../../assets/images/map.png')}
+            style={styles.mapImage}
+            resizeMode="cover"
+          />
+          <View style={styles.mapCardOverlay}>
+            <ThemedText type="defaultSemiBold" style={styles.mapCardText} lightColor="#ffffff">
+              Find healthy food near you.
+            </ThemedText>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Meal detail modal */}
@@ -719,11 +767,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 8,
     marginBottom: 14,
-  },
-  mapCardContent: {
-    backgroundColor: '#ffffff',
     borderRadius: 16,
-    padding: 20,
     overflow: 'hidden',
     shadowColor: '#3fb1ff',
     shadowOpacity: 0.15,
@@ -733,63 +777,24 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#bae6fd',
   },
-  mapIconContainer: {
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  mapIcon: {
-    fontSize: 32,
-  },
-  mapCardTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    textAlign: 'center',
-    marginBottom: 6,
-  },
-  mapCardSubtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  mapPreview: {
-    height: 120,
-    backgroundColor: '#f0f9ff',
-    borderRadius: 12,
-    marginBottom: 16,
-    position: 'relative',
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mapMarker: {
-    position: 'absolute',
-    zIndex: 2,
-  },
-  mapMarkerIcon: {
-    fontSize: 28,
-  },
-  mapStreets: {
-    position: 'absolute',
+  mapImage: {
     width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 150,
   },
-  mapStreet: {
+  mapCardOverlay: {
     position: 'absolute',
-    backgroundColor: '#cfe2ff',
-    opacity: 0.6,
-    width: '80%',
-    height: 2,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  mapStreetVertical: {
-    width: 2,
-    height: '80%',
-  },
-  mapCardAction: {
-    fontSize: 14,
+  mapCardText: {
+    fontSize: 16,
     fontWeight: '700',
+    color: '#ffffff',
     textAlign: 'center',
   },
 });
