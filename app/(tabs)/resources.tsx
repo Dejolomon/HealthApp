@@ -1,4 +1,5 @@
 
+import { router } from 'expo-router';
 import { Alert, Image, Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -199,11 +200,11 @@ export default function ResourcesScreen() {
   const filteredResources = resources.filter((r) => r.category === selectedCategory);
 
   const handleMealLogPress = () => {
-    Alert.alert('Meal log', 'Meal log reports will appear here once the database connection is added.');
+    router.push('/meal-log');
   };
 
   const handleExerciseLogPress = () => {
-    Alert.alert('Exercise log', 'Exercise log reports will appear here once the database connection is added.');
+    router.push('/exercise-log');
   };
 
   return (
