@@ -5,6 +5,8 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Image, Linking, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { AddressForm } from '@/components/address-form';
+import { DatePicker } from '@/components/date-picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useHealthData } from '@/hooks/use-health-data';
@@ -265,16 +267,34 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleContactSupport = async () => {
+    try {
+      const email = 'help@HS360.com';
+      const mailtoUrl = `mailto:${email}`;
+      const canOpen = await Linking.canOpenURL(mailtoUrl);
+      
+      if (canOpen) {
+        await Linking.openURL(mailtoUrl);
+      } else {
+        Alert.alert(
+          'Email Not Available',
+          'No email application is configured on this device. Please email us at help@HS360.com'
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'Unable to open email application. Please email us at help@HS360.com'
+      );
+    }
+  };
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ThemedText style={styles.backButton}>← Back</ThemedText>
-        </TouchableOpacity>
         <ThemedText type="title" style={styles.title} lightColor="#1a1f2e">
           Settings
         </ThemedText>
-        <View style={{ width: 60 }} />
       </View>
 
       <ThemedView style={styles.section}>
@@ -307,18 +327,15 @@ export default function SettingsScreen() {
           onChange={(value) => handleInputChange('email', value)}
           keyboardType="email-address"
         />
-        <EditableField
+        <DatePicker
           label="Date of Birth"
           value={inputs.dateOfBirth}
           onChange={(value) => handleInputChange('dateOfBirth', value)}
-          keyboardType="default"
         />
-        <EditableField
+        <AddressForm
           label="Address"
           value={inputs.address}
           onChange={(value) => handleInputChange('address', value)}
-          keyboardType="default"
-          multiline={true}
         />
         <EditableField
           label="Height"
@@ -339,28 +356,6 @@ export default function SettingsScreen() {
             <ThemedText style={styles.saveButtonText}>Save Changes</ThemedText>
           </TouchableOpacity>
         )}
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle} lightColor="#1a1f2e">
-          Health Data
-        </ThemedText>
-        <TouchableOpacity style={styles.settingItem}>
-          <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">
-            Data Export
-          </ThemedText>
-          <ThemedText style={styles.chevron} lightColor="#718096">
-            →
-          </ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">
-            Privacy Settings
-          </ThemedText>
-          <ThemedText style={styles.chevron} lightColor="#718096">
-            →
-          </ThemedText>
-        </TouchableOpacity>
       </ThemedView>
 
       <ThemedView style={styles.section}>
@@ -480,7 +475,7 @@ export default function SettingsScreen() {
             Need Help?
           </ThemedText>
         </View>
-        <TouchableOpacity style={styles.helpButton}>
+        <TouchableOpacity style={styles.helpButton} onPress={handleContactSupport}>
           <ThemedText style={styles.helpButtonText}>Contact Support</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -495,14 +490,6 @@ export default function SettingsScreen() {
           </ThemedText>
           <ThemedText style={styles.version} lightColor="#718096">
             1.0.0
-          </ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">
-            Help & Support
-          </ThemedText>
-          <ThemedText style={styles.chevron} lightColor="#718096">
-            →
           </ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -522,14 +509,9 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginTop: 8,
     marginBottom: 24,
-  },
-  backButton: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2563eb',
   },
   title: {
     fontSize: 24,

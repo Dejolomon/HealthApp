@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Linking, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -317,6 +317,7 @@ export default function PlanScreen() {
   const { goals, today } = useHealthData();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'all' | Meal['category']>('all');
+  const screenWidth = Dimensions.get('window').width;
 
   // Calculate remaining calories for the day
   const remainingCalories = Math.max(0, goals.calories - today.calories);
@@ -344,6 +345,12 @@ export default function PlanScreen() {
     { key: 'dinner', label: 'Dinner' },
     { key: 'snack', label: 'Snacks' },
   ];
+
+  const openGoogleMaps = () => {
+    const searchQuery = encodeURIComponent('health food locations near you');
+    const url = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+    Linking.openURL(url).catch((err) => console.error('Failed to open Google Maps:', err));
+  };
 
   return (
     <View style={styles.screen}>
@@ -407,6 +414,22 @@ export default function PlanScreen() {
             </ThemedView>
           </TouchableOpacity>
         ))}
+        
+        {/* Google Maps link */}
+        <View style={styles.mapContainer}>
+          <TouchableOpacity onPress={openGoogleMaps} activeOpacity={0.8}>
+            <ThemedView style={[styles.mapCard, { width: screenWidth - 40 }]}>
+              <Image 
+                source={require('../../assets/images/map.png')} 
+                style={styles.mapImage} 
+                resizeMode="cover"
+              />
+              <ThemedText style={styles.mapText} lightColor="#1a1f2e">
+                Find a health food store near you.
+              </ThemedText>
+            </ThemedView>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Meal detail modal */}
@@ -551,6 +574,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 14,
     justifyContent: 'space-between',
+    paddingBottom: 30,
   },
   mealTile: {
     width: '47%',
@@ -714,5 +738,41 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     lineHeight: 20,
+  },
+  mapContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+    paddingTop: 20,
+    flexBasis: '100%',
+    paddingHorizontal: 0,
+  },
+  mapCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 16,
+    overflow: 'visible',
+    shadowColor: '#3fb1ff',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: '#bae6fd',
+    alignItems: 'center',
+    width: '100%',
+    minWidth: '100%',
+  },
+  mapImage: {
+    width: '100%',
+    height: 200,
+    marginBottom: 12,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+  },
+  mapText: {
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });
