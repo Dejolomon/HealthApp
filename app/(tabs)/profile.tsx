@@ -67,14 +67,27 @@ export default function ProfileScreen() {
             </ThemedText>
           </View>
         )}
-        {profile.address && (
-          <View style={styles.row}>
-            <ThemedText lightColor="#4a5568">Address</ThemedText>
-            <ThemedText type="defaultSemiBold" lightColor="#1a1f2e" style={styles.addressText}>
-              {profile.address}
-            </ThemedText>
-          </View>
-        )}
+        {profile.address && (() => {
+          // Parse address format: "street|city|state|zip"
+          const addressParts = profile.address.split('|');
+          let formattedAddress = profile.address;
+          
+          if (addressParts.length === 4) {
+            const parts = addressParts.filter(p => p && p.trim());
+            if (parts.length > 0) {
+              formattedAddress = parts.join(', ');
+            }
+          }
+          
+          return (
+            <View style={styles.row}>
+              <ThemedText lightColor="#4a5568">Address</ThemedText>
+              <ThemedText type="defaultSemiBold" lightColor="#1a1f2e" style={styles.addressText}>
+                {formattedAddress}
+              </ThemedText>
+            </View>
+          );
+        })()}
         <View style={styles.row}>
           <ThemedText lightColor="#4a5568">Height</ThemedText>
           <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">

@@ -88,27 +88,18 @@ export default function HomeScreen() {
       icon: '💧',
       color: '#4da6ff',
       percent: (today.water / goals.water) * 100,
-      current: today.water,
-      goal: goals.water,
-      unit: 'oz',
     },
     {
       label: 'Calories',
       icon: '🍽️',
       color: '#ff914d',
       percent: (today.calories / goals.calories) * 100,
-      current: today.calories,
-      goal: goals.calories,
-      unit: 'kcal',
     },
     {
       label: 'Activity',
       icon: '🏃',
       color: '#36c690',
       percent: today.activity,
-      current: today.activity,
-      goal: 100,
-      unit: '%',
     },
   ];
 
@@ -160,12 +151,6 @@ export default function HomeScreen() {
                 </View>
                 <ThemedText style={styles.progressLabel} lightColor="#4b5563">
                   {item.label}
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.progressValue} lightColor="#1e40af">
-                  {item.current.toLocaleString()} {item.unit}
-                </ThemedText>
-                <ThemedText style={styles.progressGoal} lightColor="#9ca3af">
-                  / {item.goal.toLocaleString()} {item.unit}
                 </ThemedText>
                 <ThemedText type="defaultSemiBold" style={styles.progressPercent} lightColor="#111827">
                   {Math.round(clamped)}%
@@ -330,23 +315,11 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 13,
-    marginBottom: 4,
-    fontWeight: '600',
-  },
-  progressValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    marginTop: 2,
-  },
-  progressGoal: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 2,
+    marginBottom: 2,
   },
   progressPercent: {
     fontSize: 14,
     fontWeight: '700',
-    marginTop: 4,
   },
   recommendationItem: {
     flexDirection: 'row',

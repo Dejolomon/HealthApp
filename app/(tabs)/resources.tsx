@@ -1,12 +1,9 @@
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert, Image, Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useHealthData } from '@/hooks/use-health-data';
-import { exportExerciseLog, exportMealLog } from '@/utils/export-data';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 type ResourceCategory = 'Nutrition' | 'Exercise' | 'Mental health';
 
@@ -198,79 +195,15 @@ const videoTutorials: VideoTutorial[] = [
 
 export default function ResourcesScreen() {
   const [selectedCategory, setSelectedCategory] = React.useState<ResourceCategory>('Nutrition');
-  const { addCalories } = useHealthData();
 
   const filteredResources = resources.filter((r) => r.category === selectedCategory);
 
-  // Add the two meals to the log once when component mounts
-  useEffect(() => {
-    const addMealsToLog = async () => {
-      try {
-        const mealsAddedKey = 'healthapp:meals-added-today';
-        const todayKey = new Date().toISOString().slice(0, 10);
-        const lastAddedDate = await AsyncStorage.getItem(mealsAddedKey);
-
-        // Only add if we haven't added meals today
-        if (lastAddedDate !== todayKey) {
-          // Hummus with Veggies: 180 calories
-          // Apple with Almond Butter: 220 calories
-          // Total: 400 calories
-          addCalories(180 + 220);
-          await AsyncStorage.setItem(mealsAddedKey, todayKey);
-        }
-      } catch (error) {
-        // Silently fail - don't interrupt user experience
-        console.error('Error adding meals to log:', error);
-      }
-    };
-
-    addMealsToLog();
-  }, [addCalories]);
-
-  const handleMealLogPress = async () => {
-    try {
-      await exportMealLog();
-      Alert.alert(
-        'Meal Log Exported',
-        'Your meal log file is ready! In the share menu:\n\n' +
-        '• iOS: Tap "Save to Files" to save, then open in Files app\n' +
-        '• Android: Choose "Save to Drive" or "Files" app\n' +
-        '• You can also email it to yourself or open in any text/JSON viewer app\n\n' +
-        'The file is in JSON format and can be opened with:\n' +
-        '• Any text editor\n' +
-        '• Notes app\n' +
-        '• JSON viewer apps\n' +
-        '• Spreadsheet apps (import as JSON)',
-      );
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'Failed to export meal log. Please try again.',
-      );
-    }
+  const handleMealLogPress = () => {
+    Alert.alert('Meal log', 'Meal log reports will appear here once the database connection is added.');
   };
 
-  const handleExerciseLogPress = async () => {
-    try {
-      await exportExerciseLog();
-      Alert.alert(
-        'Exercise Log Exported',
-        'Your exercise log file is ready! In the share menu:\n\n' +
-        '• iOS: Tap "Save to Files" to save, then open in Files app\n' +
-        '• Android: Choose "Save to Drive" or "Files" app\n' +
-        '• You can also email it to yourself or open in any text/JSON viewer app\n\n' +
-        'The file is in JSON format and can be opened with:\n' +
-        '• Any text editor\n' +
-        '• Notes app\n' +
-        '• JSON viewer apps\n' +
-        '• Spreadsheet apps (import as JSON)',
-      );
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'Failed to export exercise log. Please try again.',
-      );
-    }
+  const handleExerciseLogPress = () => {
+    Alert.alert('Exercise log', 'Exercise log reports will appear here once the database connection is added.');
   };
 
   return (

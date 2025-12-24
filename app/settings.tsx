@@ -3,12 +3,13 @@ import * as ImagePicker from 'expo-image-picker';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Image, Linking, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { AddressForm } from '@/components/address-form';
-import { DatePicker } from '@/components/date-picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { DateOfBirthPicker } from '@/components/date-of-birth-picker';
+import { AddressPicker } from '@/components/address-picker';
+import { HeightPicker } from '@/components/height-picker';
 import { useHealthData } from '@/hooks/use-health-data';
 import { calculateBMI, useProfile } from '@/hooks/use-profile';
 
@@ -53,7 +54,7 @@ export default function SettingsScreen() {
   const { setMetric, updateToday } = useHealthData();
   const [inputs, setInputs] = useState({
     name: profile.name,
-    height: profile.height.toString(),
+    height: profile.height, // Store as number for HeightPicker
     weight: profile.weight.toString(),
     dateOfBirth: profile.dateOfBirth || '',
     address: profile.address || '',
@@ -69,7 +70,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     setInputs({
       name: profile.name,
-      height: profile.height.toString(),
+      height: profile.height, // Store as number for HeightPicker
       weight: profile.weight.toString(),
       dateOfBirth: profile.dateOfBirth || '',
       address: profile.address || '',
@@ -104,7 +105,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setInputs((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
@@ -135,7 +136,7 @@ export default function SettingsScreen() {
 
   const handleSave = async () => {
     const name = inputs.name.trim() || profile.name;
-    const height = parseFloat(inputs.height) || profile.height;
+    const height = typeof inputs.height === 'number' ? inputs.height : parseFloat(inputs.height.toString()) || profile.height;
     const weight = parseFloat(inputs.weight) || profile.weight;
 
     if (height > 0 && weight > 0) {
@@ -151,6 +152,7 @@ export default function SettingsScreen() {
       await saveProfile(newProfile);
 
       // Update BMI and weight in health data
+      // BMI calculation uses height in inches, which is what we store
       const newBMI = calculateBMI(weight, height);
       setMetric('bmi', newBMI);
       setMetric('weight', weight);
@@ -267,34 +269,25 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleContactSupport = async () => {
-    try {
-      const email = 'help@HS360.com';
-      const mailtoUrl = `mailto:${email}`;
-      const canOpen = await Linking.canOpenURL(mailtoUrl);
-      
-      if (canOpen) {
-        await Linking.openURL(mailtoUrl);
-      } else {
-        Alert.alert(
-          'Email Not Available',
-          'No email application is configured on this device. Please email us at help@HS360.com'
-        );
-      }
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'Unable to open email application. Please email us at help@HS360.com'
-      );
-    }
-  };
-
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
+      >
       <View style={styles.headerRow}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <ThemedText style={styles.backButton}>← Back</ThemedText>
+        </TouchableOpacity>
         <ThemedText type="title" style={styles.title} lightColor="#1a1f2e">
           Settings
         </ThemedText>
+        <View style={{ width: 60 }} />
       </View>
 
       <ThemedView style={styles.section}>
@@ -327,22 +320,20 @@ export default function SettingsScreen() {
           onChange={(value) => handleInputChange('email', value)}
           keyboardType="email-address"
         />
-        <DatePicker
+        <DateOfBirthPicker
           label="Date of Birth"
           value={inputs.dateOfBirth}
           onChange={(value) => handleInputChange('dateOfBirth', value)}
         />
-        <AddressForm
+        <AddressPicker
           label="Address"
           value={inputs.address}
           onChange={(value) => handleInputChange('address', value)}
         />
-        <EditableField
+        <HeightPicker
           label="Height"
-          value={inputs.height}
+          value={typeof inputs.height === 'number' ? inputs.height : parseFloat(inputs.height.toString()) || profile.height}
           onChange={(value) => handleInputChange('height', value)}
-          unit="inches"
-          keyboardType="decimal-pad"
         />
         <EditableField
           label="Weight"
@@ -356,6 +347,28 @@ export default function SettingsScreen() {
             <ThemedText style={styles.saveButtonText}>Save Changes</ThemedText>
           </TouchableOpacity>
         )}
+      </ThemedView>
+
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle" style={styles.sectionTitle} lightColor="#1a1f2e">
+          Health Data
+        </ThemedText>
+        <TouchableOpacity style={styles.settingItem}>
+          <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">
+            Data Export
+          </ThemedText>
+          <ThemedText style={styles.chevron} lightColor="#718096">
+            →
+          </ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settingItem}>
+          <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">
+            Privacy Settings
+          </ThemedText>
+          <ThemedText style={styles.chevron} lightColor="#718096">
+            →
+          </ThemedText>
+        </TouchableOpacity>
       </ThemedView>
 
       <ThemedView style={styles.section}>
@@ -475,7 +488,7 @@ export default function SettingsScreen() {
             Need Help?
           </ThemedText>
         </View>
-        <TouchableOpacity style={styles.helpButton} onPress={handleContactSupport}>
+        <TouchableOpacity style={styles.helpButton}>
           <ThemedText style={styles.helpButtonText}>Contact Support</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -492,8 +505,17 @@ export default function SettingsScreen() {
             1.0.0
           </ThemedText>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.settingItem}>
+          <ThemedText type="defaultSemiBold" lightColor="#1a1f2e">
+            Help & Support
+          </ThemedText>
+          <ThemedText style={styles.chevron} lightColor="#718096">
+            →
+          </ThemedText>
+        </TouchableOpacity>
       </ThemedView>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -509,9 +531,14 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     marginTop: 8,
     marginBottom: 24,
+  },
+  backButton: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2563eb',
   },
   title: {
     fontSize: 24,
