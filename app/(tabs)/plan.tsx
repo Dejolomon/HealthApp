@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Image, Linking, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useHealthData } from '@/hooks/use-health-data';
+import { getAIMealRecommendations, isAIConfigured, type AIMealRecommendation } from '@/utils/ai-service';
 
 type Meal = {
   id: string;
@@ -317,6 +318,9 @@ export default function PlanScreen() {
   const { goals, today } = useHealthData();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'all' | Meal['category']>('all');
+  const [aiRecommendations, setAiRecommendations] = useState<AIMealRecommendation[]>([]);
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [showAIRecommendations, setShowAIRecommendations] = useState(false);
 
   // Calculate remaining calories for the day
   const remainingCalories = Math.max(0, goals.calories - today.calories);
@@ -344,6 +348,30 @@ export default function PlanScreen() {
     { key: 'dinner', label: 'Dinner' },
     { key: 'snack', label: 'Snacks' },
   ];
+
+  const handleGetAIRecommendations = async () => {
+    if (!isAIConfigured()) {
+      Alert.alert(
+        'AI Not Configured',
+        'Please set EXPO_PUBLIC_OPENAI_API_KEY in your environment variables to use AI recommendations.',
+      );
+      return;
+    }
+
+    setLoadingAI(true);
+    try {
+      const recommendations = await getAIMealRecommendations(remainingCalories, {
+        calories: goals.calories,
+      });
+      setAiRecommendations(recommendations);
+      setShowAIRecommendations(true);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to get AI recommendations. Please try again.');
+      console.error('AI recommendation error:', error);
+    } finally {
+      setLoadingAI(false);
+    }
+  };
 
   const handleOpenMaps = async () => {
     const searchQuery = 'health food stores';
@@ -375,6 +403,21 @@ export default function PlanScreen() {
     }
   };
 
+  // Convert AI recommendation to Meal format for display
+  const convertAIRecommendationToMeal = (rec: AIMealRecommendation): Meal => ({
+    id: `ai-${Date.now()}-${Math.random()}`,
+    name: rec.name,
+    category: rec.category,
+    calories: rec.calories,
+    protein: rec.protein,
+    carbs: rec.carbs,
+    fat: rec.fat,
+    ingredients: rec.ingredients,
+    steps: [`AI Recommended: ${rec.reason}`, ...rec.ingredients.map((ing) => `Add ${ing}`)],
+    prepTime: rec.prepTime,
+    cookTime: 0,
+  });
+
   return (
     <View style={styles.screen}>
       <ThemedText type="title" style={styles.header} lightColor="#1a1f2e">
@@ -405,10 +448,67 @@ export default function PlanScreen() {
             </ThemedText>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity
+          style={[styles.categoryButton, styles.aiButton, showAIRecommendations && styles.aiButtonActive]}
+          onPress={handleGetAIRecommendations}
+          disabled={loadingAI}
+        >
+          {loadingAI ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <ThemedText
+              style={[styles.categoryLabel, showAIRecommendations && styles.categoryLabelActive]}
+              lightColor={showAIRecommendations ? '#ffffff' : '#4b5563'}
+            >
+              🤖 AI Suggestions
+            </ThemedText>
+          )}
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Meal tiles grid */}
       <ScrollView style={styles.mealsContainer} contentContainerStyle={styles.mealsGrid}>
+        {showAIRecommendations && aiRecommendations.length > 0 && (
+          <>
+            <ThemedText type="subtitle" style={styles.aiSectionTitle} lightColor="#1a1f2e">
+              🤖 AI Recommendations
+            </ThemedText>
+            {aiRecommendations.map((rec) => {
+              const meal = convertAIRecommendationToMeal(rec);
+              return (
+                <TouchableOpacity
+                  key={meal.id}
+                  style={[styles.mealTile, styles.aiMealTile]}
+                  onPress={() => setSelectedMeal(meal)}
+                  activeOpacity={0.8}
+                >
+                  <ThemedView style={[styles.mealTileContent, styles.aiMealContent]}>
+                    <ThemedText type="defaultSemiBold" style={styles.mealName} lightColor="#1a1f2e">
+                      {meal.name}
+                    </ThemedText>
+                    <ThemedText style={styles.aiReason} lightColor="#2563eb">
+                      {rec.reason}
+                    </ThemedText>
+                    <View style={styles.mealInfo}>
+                      <ThemedText style={styles.mealCalories} lightColor="#4b5563">
+                        {meal.calories} cal
+                      </ThemedText>
+                      <ThemedText style={styles.mealMacros} lightColor="#6b7280">
+                        P: {meal.protein}g • C: {meal.carbs}g • F: {meal.fat}g
+                      </ThemedText>
+                    </View>
+                    <ThemedText style={styles.mealTime} lightColor="#9ca3af">
+                      {meal.prepTime} min
+                    </ThemedText>
+                  </ThemedView>
+                </TouchableOpacity>
+              );
+            })}
+            <ThemedText type="subtitle" style={styles.aiSectionTitle} lightColor="#1a1f2e">
+              All Meals
+            </ThemedText>
+          </>
+        )}
         {filteredMeals.map((meal) => (
           <TouchableOpacity
             key={meal.id}
@@ -796,5 +896,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
     textAlign: 'center',
+  },
+  aiButton: {
+    backgroundColor: '#8b5cf6',
+    borderColor: '#8b5cf6',
+  },
+  aiButtonActive: {
+    backgroundColor: '#7c3aed',
+    borderColor: '#7c3aed',
+  },
+  aiSectionTitle: {
+    width: '100%',
+    marginTop: 8,
+    marginBottom: 12,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  aiMealTile: {
+    width: '100%',
+  },
+  aiMealContent: {
+    borderColor: '#c4b5fd',
+    borderWidth: 2,
+  },
+  aiReason: {
+    fontSize: 12,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    marginTop: 4,
+    marginBottom: 4,
+    paddingHorizontal: 14,
   },
 });

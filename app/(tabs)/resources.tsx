@@ -1,6 +1,6 @@
 
 import { router } from 'expo-router';
-import { Alert, Image, Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -207,6 +207,14 @@ export default function ResourcesScreen() {
     router.push('/exercise-log');
   };
 
+  const handleAIWorkoutPress = () => {
+    router.push('/ai-workout');
+  };
+
+  const handleAIAssistantPress = () => {
+    router.push('/ai-assistant');
+  };
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <ThemedText type="title" style={styles.screenTitle} lightColor="#1a1f2e">
@@ -304,6 +312,19 @@ export default function ResourcesScreen() {
           <TouchableOpacity style={styles.logButton} onPress={handleExerciseLogPress}>
             <ThemedText type="defaultSemiBold" style={styles.logButtonText} lightColor="#ffffff">
               Exercise log
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.aiButtonsRow}>
+          <TouchableOpacity style={styles.aiWorkoutButton} onPress={handleAIWorkoutPress}>
+            <ThemedText type="defaultSemiBold" style={styles.aiWorkoutButtonText} lightColor="#ffffff">
+              🤖 AI Workout
+            </ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.aiAssistantButton} onPress={handleAIAssistantPress}>
+            <ThemedText type="defaultSemiBold" style={styles.aiWorkoutButtonText} lightColor="#ffffff">
+              💬 AI Assistant
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -450,6 +471,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logButtonText: {
+    fontSize: 14,
+    color: '#ffffff',
+  },
+  aiButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  aiWorkoutButton: {
+    flex: 1,
+    backgroundColor: '#8b5cf6',
+    borderRadius: 999,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#8b5cf6',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  aiAssistantButton: {
+    flex: 1,
+    backgroundColor: '#10b981',
+    borderRadius: 999,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#10b981',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  aiWorkoutButtonText: {
     fontSize: 14,
     color: '#ffffff',
   },

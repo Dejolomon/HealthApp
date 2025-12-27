@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
-import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useHealthData } from '@/hooks/use-health-data';
 import { useProfile } from '@/hooks/use-profile';
+import { getAIGreetingMessage, getAIHomeRecommendations, isAIConfigured } from '@/utils/ai-service';
 
 type MetricCardProps = {
   label: string;
@@ -67,11 +69,77 @@ export default function HomeScreen() {
   const {
     today,
     goals,
-    recommendations,
+    recommendations: fallbackRecommendations,
   } = useHealthData();
+  
+  const [aiRecommendations, setAiRecommendations] = useState<string[] | null>(null);
+  const [aiGreetingMessage, setAiGreetingMessage] = useState<string | null>(null);
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [loadingGreeting, setLoadingGreeting] = useState(false);
   
   const greeting = getTimeBasedGreeting();
   const bmiCategory = getBMICategory(today.bmi);
+  const defaultGreetingMessage = 'Your health metrics look great today!';
+
+  // Fetch AI recommendations and greeting when component mounts or data changes
+  useEffect(() => {
+    const fetchAIData = async () => {
+      if (!isAIConfigured()) {
+        return; // Use fallback if AI is not configured
+      }
+
+      // Fetch greeting message
+      setLoadingGreeting(true);
+      try {
+        const greetingMsg = await getAIGreetingMessage(
+          {
+            steps: today.steps,
+            sleep: today.sleep,
+            water: today.water,
+            calories: today.calories,
+            activity: today.activity,
+            bloodSugar: today.bloodSugar,
+            bmi: today.bmi,
+          },
+          goals
+        );
+        setAiGreetingMessage(greetingMsg);
+      } catch (error) {
+        console.error('Failed to fetch AI greeting:', error);
+        // Keep default greeting on error
+      } finally {
+        setLoadingGreeting(false);
+      }
+
+      // Fetch recommendations
+      setLoadingAI(true);
+      try {
+        const recommendations = await getAIHomeRecommendations(
+          {
+            steps: today.steps,
+            sleep: today.sleep,
+            water: today.water,
+            calories: today.calories,
+            activity: today.activity,
+            bloodSugar: today.bloodSugar,
+            bmi: today.bmi,
+          },
+          goals
+        );
+        setAiRecommendations(recommendations);
+      } catch (error) {
+        console.error('Failed to fetch AI recommendations:', error);
+        // Keep fallback recommendations on error
+      } finally {
+        setLoadingAI(false);
+      }
+    };
+
+    fetchAIData();
+  }, [today, goals]);
+
+  // Use AI recommendations if available, otherwise use fallback
+  const recommendations = aiRecommendations || fallbackRecommendations;
 
   const metricData: MetricCardProps[] = [
     { label: 'BMI', value: today.bmi.toFixed(1), helper: bmiCategory, icon: '🩺' },
@@ -127,7 +195,7 @@ export default function HomeScreen() {
           {greeting}, {profile.name}
         </ThemedText>
         <ThemedText style={styles.heroSub} lightColor="#e7f4ff">
-          Your health metrics look great today!
+          {loadingGreeting ? '...' : (aiGreetingMessage || defaultGreetingMessage)}
         </ThemedText>
       </ThemedView>
 
@@ -162,12 +230,30 @@ export default function HomeScreen() {
       </ThemedView>
 
       <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle} lightColor="#1a1f2e">
-          Recommendations
-        </ThemedText>
-        {recommendations.map((rec) => (
-          <RecommendationItem key={rec} text={rec} />
-        ))}
+        <View style={styles.recommendationsHeader}>
+          <ThemedText type="subtitle" style={styles.sectionTitle} lightColor="#1a1f2e">
+            Recommendations
+          </ThemedText>
+          {isAIConfigured() && aiRecommendations && (
+            <ThemedView style={styles.aiBadge}>
+              <ThemedText style={styles.aiBadgeText} lightColor="#8b5cf6">
+                🤖 AI
+              </ThemedText>
+            </ThemedView>
+          )}
+        </View>
+        {loadingAI && !aiRecommendations ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#2563eb" />
+            <ThemedText style={styles.loadingText} lightColor="#6b7280">
+              Generating personalized recommendations...
+            </ThemedText>
+          </View>
+        ) : (
+          recommendations.map((rec) => (
+            <RecommendationItem key={rec} text={rec} />
+          ))
+        )}
       </ThemedView>
 
     </ScrollView>
@@ -376,5 +462,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
     borderWidth: 1,
     borderColor: '#bae6fd',
+  },
+  recommendationsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  aiBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#f3e8ff',
+    borderWidth: 1,
+    borderColor: '#c4b5fd',
+  },
+  aiBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

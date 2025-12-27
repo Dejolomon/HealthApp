@@ -1,16 +1,18 @@
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
+    ActivityIndicator,
     Image,
     ScrollView,
     StyleSheet,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useHealthData } from '@/hooks/use-health-data';
+import { getAIHealthInsights, isAIConfigured, type AIHealthInsight } from '@/utils/ai-service';
 
 type TimeRangeKey =
   | 'today'
@@ -35,6 +37,8 @@ export default function InsightsScreen() {
   const { today, history, goals, longTerm, recommendations } = useHealthData();
   const [selectedRange, setSelectedRange] = useState<TimeRangeKey>('7d');
   const [showRangeMenu, setShowRangeMenu] = useState(false);
+  const [aiInsights, setAiInsights] = useState<AIHealthInsight[]>([]);
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const allDays = useMemo(() => [today, ...history], [today, history]);
 
@@ -122,6 +126,46 @@ export default function InsightsScreen() {
 
     return notes;
   }, [goals.sleep, goals.steps, goals.water, rangeStats]);
+
+  const fetchAIInsights = async () => {
+    if (!isAIConfigured()) {
+      return; // Silently fail if AI is not configured
+    }
+
+    setLoadingAI(true);
+    try {
+      const insights = await getAIHealthInsights(
+        {
+          steps: today.steps,
+          sleep: today.sleep,
+          water: today.water,
+          calories: today.calories,
+          bmi: today.bmi,
+          bloodPressure: today.bloodPressure,
+        },
+        goals,
+        history.slice(0, 7).map((d) => ({
+          date: d.date,
+          steps: d.steps,
+          sleep: d.sleep,
+          water: d.water,
+          calories: d.calories,
+        }))
+      );
+      setAiInsights(insights);
+    } catch (error) {
+      console.error('Failed to fetch AI insights:', error);
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch AI insights when component mounts or data changes
+    if (isAIConfigured()) {
+      fetchAIInsights();
+    }
+  }, [today, goals, history]);
 
   const rangeLabel = rangeConfig.label === 'Last Week' ? 'This Week' : rangeConfig.label;
 
@@ -285,38 +329,87 @@ export default function InsightsScreen() {
 
       {/* Health insights carousel */}
       <ThemedView style={styles.healthInsightsCard}>
-        <ThemedText type="subtitle" lightColor="#111827" style={styles.sectionTitle}>
-          Health Insights
-        </ThemedText>
+        <View style={styles.insightsHeader}>
+          <ThemedText type="subtitle" lightColor="#111827" style={styles.sectionTitle}>
+            Health Insights
+          </ThemedText>
+          {isAIConfigured() && (
+            <TouchableOpacity
+              onPress={fetchAIInsights}
+              disabled={loadingAI}
+              style={styles.refreshButton}
+            >
+              {loadingAI ? (
+                <ActivityIndicator size="small" color="#2563eb" />
+              ) : (
+                <ThemedText style={styles.refreshButtonText} lightColor="#2563eb">
+                  🔄 Refresh AI
+                </ThemedText>
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.insightsRow}
         >
-          <ThemedView style={styles.insightPill}>
-            <ThemedText type="defaultSemiBold" lightColor="#111827">
-              Sleep Pattern
-            </ThemedText>
-            <ThemedText lightColor="#6b7280" style={styles.insightText}>
-              {aiGoalSummary[0]}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.insightPill}>
-            <ThemedText type="defaultSemiBold" lightColor="#111827">
-              Activity
-            </ThemedText>
-            <ThemedText lightColor="#6b7280" style={styles.insightText}>
-              {aiGoalSummary[1] ?? recommendations[0]}
-            </ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.insightPill}>
-            <ThemedText type="defaultSemiBold" lightColor="#111827">
-              Hydration
-            </ThemedText>
-            <ThemedText lightColor="#6b7280" style={styles.insightText}>
-              {aiGoalSummary[2] ?? recommendations[1]}
-            </ThemedText>
-          </ThemedView>
+          {aiInsights.length > 0 ? (
+            aiInsights.map((insight, index) => (
+              <ThemedView key={index} style={[styles.insightPill, styles.aiInsightPill]}>
+                <View style={styles.insightHeader}>
+                  <ThemedText type="defaultSemiBold" lightColor="#111827">
+                    {insight.title}
+                  </ThemedText>
+                  <ThemedView
+                    style={[
+                      styles.priorityBadge,
+                      insight.priority === 'high' && styles.priorityHigh,
+                      insight.priority === 'medium' && styles.priorityMedium,
+                      insight.priority === 'low' && styles.priorityLow,
+                    ]}
+                  >
+                    <ThemedText style={styles.priorityText} lightColor="#ffffff">
+                      {insight.priority}
+                    </ThemedText>
+                  </ThemedView>
+                </View>
+                <ThemedText lightColor="#6b7280" style={styles.insightText}>
+                  {insight.insight}
+                </ThemedText>
+                <ThemedText lightColor="#2563eb" style={styles.recommendationText}>
+                  💡 {insight.recommendation}
+                </ThemedText>
+              </ThemedView>
+            ))
+          ) : (
+            <>
+              <ThemedView style={styles.insightPill}>
+                <ThemedText type="defaultSemiBold" lightColor="#111827">
+                  Sleep Pattern
+                </ThemedText>
+                <ThemedText lightColor="#6b7280" style={styles.insightText}>
+                  {aiGoalSummary[0]}
+                </ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.insightPill}>
+                <ThemedText type="defaultSemiBold" lightColor="#111827">
+                  Activity
+                </ThemedText>
+                <ThemedText lightColor="#6b7280" style={styles.insightText}>
+                  {aiGoalSummary[1] ?? recommendations[0]}
+                </ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.insightPill}>
+                <ThemedText type="defaultSemiBold" lightColor="#111827">
+                  Hydration
+                </ThemedText>
+                <ThemedText lightColor="#6b7280" style={styles.insightText}>
+                  {aiGoalSummary[2] ?? recommendations[1]}
+                </ThemedText>
+              </ThemedView>
+            </>
+          )}
         </ScrollView>
       </ThemedView>
 
@@ -653,6 +746,61 @@ const styles = StyleSheet.create({
   updateButtonText: {
     fontSize: 15,
     fontWeight: '800',
+  },
+  insightsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  refreshButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+  },
+  refreshButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  aiInsightPill: {
+    borderColor: '#8b5cf6',
+    borderWidth: 1.5,
+    backgroundColor: '#faf5ff',
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    fontSize: 10,
+  },
+  priorityHigh: {
+    backgroundColor: '#ef4444',
+  },
+  priorityMedium: {
+    backgroundColor: '#f59e0b',
+  },
+  priorityLow: {
+    backgroundColor: '#10b981',
+  },
+  priorityText: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  recommendationText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });
 
